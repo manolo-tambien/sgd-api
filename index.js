@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Endpoint GET para obtener un mensaje
-app.get('/ObtenerDocuementos', async (req, res) => {
+app.get('/ObtenerDocumentos', async (req, res) => {
     const { MongoClient } = require('mongodb');
     const client = new MongoClient('mongodb://localhost:27017');
     
@@ -44,7 +44,7 @@ app.get('/ObtenerDocuementos', async (req, res) => {
 });
 
 app.post('/GuardarDocumento', upload.single('pdf'), async (req, res) => {
-    const { MongoClient } = require('mongodb');
+    const { MongoClient, ObjectId } = require('mongodb');
 
     const client = new MongoClient('mongodb://localhost:27017');
     try {
@@ -53,13 +53,17 @@ app.post('/GuardarDocumento', upload.single('pdf'), async (req, res) => {
         const collection = database.collection('documentosProveedores');
 
         const documento = {
+            _id: new ObjectId(),
             nombre: req.body.nombre,
             region: req.body.region,
             categoria: req.body.categoria,
             grado: req.body.grado,
-            // Otros campos del formulario que desees guardar
+            descripcion: req.body.descripcion,
             pdf: {
-                data: req.file
+                size: req.file.size,
+                mimetype: req.file.mimetype,
+                filename: req.file.filename,
+                path: req.file.path
             }
         };
 
@@ -73,6 +77,7 @@ app.post('/GuardarDocumento', upload.single('pdf'), async (req, res) => {
         await client.close();
     }
 });
+
 
 
 // Sembrar la base de datos antes de iniciar el servidor
